@@ -1,16 +1,27 @@
 {
   "name": "@chuanhezi/koishi-plugin-pixiv-repaired",
-  "description": "pixiv插件增强版：支持随机涩图/R18涩图、discovery页面、浏览器代理下载图片",
-  "version": "0.3.0",
+  "description": "pixiv插件增强版：支持随机涩图/R18涩图、discovery页面随机推荐、浏览器代理下载图片，无需Cookie即可使用",
+  "version": "0.3.1",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "author": {
+    "name": "chuanhezi",
+    "email": ""
+  },
+  "contributors": [
+    {
+      "name": "QuanhuZeYu",
+      "url": "https://github.com/QuanhuZeYu/koishi-plugin-pixiv"
+    }
+  ],
   "homepage": "https://github.com/chuanhezi/koishi-plugin-pixiv-repaired",
   "repository": {
     "type": "git",
     "url": "https://github.com/chuanhezi/koishi-plugin-pixiv-repaired.git"
   },
   "files": [
-    "lib"
+    "lib",
+    "readme.md"
   ],
   "license": "MIT",
   "keywords": [
@@ -19,8 +30,33 @@
     "plugin",
     "pixiv",
     "setu",
-    "r18"
+    "r18",
+    "涩图",
+    "pixiv-discovery"
   ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "koishi": {
+    "description": {
+      "zh": "Pixiv 图片插件增强版 —— 支持随机涩图 & R18 涩图，从 Pixiv Discovery 页面随机获取推荐作品，通过浏览器代理下载图片，无需手动获取 Cookie。",
+      "en": "Enhanced Pixiv image plugin — random illustrations & R18 illustrations from Pixiv Discovery page, downloads images via browser proxy, no manual cookie required."
+    },
+    "service": {
+      "required": ["puppeteer"]
+    },
+    "locales": ["zh"]
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf lib",
+    "prepublishOnly": "npm run build"
+  },
   "dependencies": {
     "axios": "^1.7.7",
     "@satorijs/element": "^3.1.7"
@@ -28,5 +64,23 @@
   "peerDependencies": {
     "koishi": "^4.18.7",
     "koishi-plugin-puppeteer": "^3.9.0"
+  },
+  "peerDependenciesMeta": {
+    "koishi": {
+      "optional": false
+    },
+    "koishi-plugin-puppeteer": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "koishi": "^4.18.7",
+    "koishi-plugin-puppeteer": "^3.9.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+    }
   }
 }

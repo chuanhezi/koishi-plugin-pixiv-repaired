@@ -1,13 +1,37 @@
 import { Context, Schema } from "koishi";
+
 export declare const name = "pixiv";
-export declare const usage = "\u7B2C\u4E00\u6B21\u4F7F\u7528\u672C\u63D2\u4EF6\u65F6\u8BF7\u5728puppeteer\u670D\u52A1\u4E2D\u8BBE\u7F6Eargs: `--user-data-dir=/path/to/custom-profile-dir` \u5426\u5219\u65E0\u6CD5\u8BB0\u5F55\u767B\u5F55\u4FE1\u606F\n\n\u672C\u63D2\u4EF6\u6CA1\u6709\u4F7F\u7528\u53CD\u4EE3\u7AD9\u70B9\uFF0C\u76F4\u63A5\u64CD\u4F5Cpixiv\u7F51\u7AD9\uFF0C\u6240\u4EE5\u9700\u8981\u80FD\u8BBF\u95EE\u56FD\u5916\u7F51\u7EDC\uFF0C\u5728puppeteer\u670D\u52A1\u4E2D\u6DFB\u52A0args `--proxy-server=127.0.0.1:<\u7AEF\u53E3>`\n\n\u4E14\u5F3A\u70C8\u63A8\u8350\u5173\u95ED\u65E0\u5934\u6A21\u5F0F\uFF0C\u56E0\u4E3A\u63D2\u4EF6\u53EF\u80FD\u4F1A\u6253\u5F00\u5F88\u591A\u9875\u9762\uFF0C\u5982\u679C\u4F60\u5F00\u4E86\u65E0\u5934\u6A21\u5F0F\u53EF\u80FD\u4F1A\u4E0D\u77E5\u4E0D\u89C9\u5403\u6389\u5F88\u591A\u5185\u5B58\u548C\u6027\u80FD\uFF0C\u5173\u6389\u65E0\u5934\u968F\u65F6\u67E5\u770B\u6D4F\u89C8\u5668\n\n\u4F7F\u7528 `\u968F\u673A\u6DA9\u56FE` \u5373\u53EF\u968F\u673A\u83B7\u53D6\u4E00\u5F20p\u7AD9\u63A8\u8350\u4F5C\u54C1\u4E2D\u7684\u56FE\u7247~~~";
+
+export declare const usage: string;
+
 export declare const inject: {
     required: string[];
 };
-export interface Config {
+
+/** 基本设置 */
+interface BaseConfig {
+    /** 登录状态 — 确认已在浏览器中登录 Pixiv 后开启 */
     ensureLogin: boolean;
+    /** 页面加载与导航的最大等待时间（毫秒） */
     等待NAV超时时间: number;
-    HTMLSelector: object;
 }
+
+/** 高级设置 — HTML 选择器配置 */
+interface AdvancedConfig {
+    HTMLSelector: {
+        /** Discovery 推荐页面的图片选择器 */
+        推荐作品URLs选择器: string;
+        /** R18 排行榜页面的图片选择器 */
+        R18排行URLs选择器: string;
+        /** 点击"查看全部"按钮的 JS 代码 */
+        主图像查看全部按钮选择点击: string;
+        /** 作品详情页原图 URL 提取 JS 代码 */
+        主图像URLs选择器: string;
+    };
+}
+
+export type Config = BaseConfig & AdvancedConfig;
+
 export declare const Config: Schema<Config>;
+
 export declare function apply(ctx: Context): void;
