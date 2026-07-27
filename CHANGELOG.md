@@ -4,6 +4,57 @@
 
 ---
 
+## 版本 0.3.2
+
+### 修复 Bug
+
+#### 1. `downloadPixivImg` — 竞态条件导致下载超时
+
+**现象**：日志出现「下载超时」，图片下载失败（「图片获取成功: 数量0」）
+
+**原因**：使用 `page.once("response")` 监听下载响应，`once` 只捕获第一个响应。如果图片 URL 有重定向（302），第一个响应是重定向响应而非图片本体，导致 buffer 为空或超时。
+
+**修复**：直接使用 `page.goto()` 的返回值获取 HTTP 响应，`goto()` 返回的是最终主资源的响应对象，不会受重定向影响。
+
+```javascript
+// 旧: once("response") + setTimeout 超时竞态
+// 新: const response = await imgPage.goto(picUrl, ...); await response.buffer();
+```
+
+#### 2. `ERR_CONNECTION_CLOSED` — 重试间隔不足
+
+**现象**：3 次重试全部失败，报 `net::ERR_CONNECTION_CLOSED`
+
+**修复**：重试间隔加入随机抖动 (jitter)：`1000 * attempt` → `1000 * attempt + Math.random() * 1000`
+
+#### 3. 「查看全部」按钮选择器空指针
+
+**现象**：`TypeError: Cannot read properties of undefined (reading 'click')`（高频出现）
+
+**原因**：单图作品没有「查看全部」按钮，选择器返回 undefined 后仍调用 `.click()`
+
+**修复**：`lookAllDiv.click()` → `lookAllDiv?.click()`
+
+#### 4. `selectSuitablePage` 缺少请求拦截
+
+**现象**：puppeteer 重载后（cycle 调用 `selectSuitablePage`），新页面没有 `setRequestInterception`，导致无法捕获 `pixivNetHeader` 和 `ipximgNetHeader`
+
+**修复**：在 `selectSuitablePage` 末尾添加与 `pupterBrowserInit` 一致的请求拦截设置，重复设置时静默跳过。
+
+#### 5. 多个指令并发操作同一个 Puppeteer 页面
+
+**现象**：多人同时调用普通或 R18 指令时，会共享同一个受控页面，互相覆盖导航状态，可能抓取到错误作品或导致其中一个指令失败。
+
+**修复**：为受控页面增加 FIFO 异步互斥队列。页面初始化、Puppeteer 重载选页和随机取图流程统一串行执行，并在异常情况下通过 `finally` 释放锁，避免后续指令永久阻塞。
+
+#### 6. npm 发布前置脚本无法执行
+
+**现象**：仓库当前以 `lib/index.js` 作为实际发布入口，但 `prepublishOnly` 会调用不可用的 TypeScript 构建流程，导致发布中断。
+
+**修复**：发布前直接使用 Node.js 校验实际入口文件的语法，确保 npm 发布流程能够执行。
+
+---
+
 ## 版本 0.0.1
 
 ### 修复 Bug
@@ -126,4 +177,3 @@
 | `package.json` | name/main/files 等 | 包名/入口/依赖修正 |
 
 ---
-
