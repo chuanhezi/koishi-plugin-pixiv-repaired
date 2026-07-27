@@ -21,7 +21,7 @@ interface AdvancedConfig {
     HTMLSelector: {
         /** Discovery 推荐页面的图片选择器 */
         推荐作品URLs选择器: string;
-        /** R18 排行榜页面的图片选择器 */
+        /** R18 Discovery 页面的推荐作品图片选择器 */
         R18排行URLs选择器: string;
         /** 点击"查看全部"按钮的 JS 代码 */
         主图像查看全部按钮选择点击: string;

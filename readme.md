@@ -10,7 +10,7 @@ Pixiv 图片插件增强版 —— 从 Pixiv Discovery 页面随机获取推荐�
 
 - ✅ 无需手动配置 Cookie，基于浏览器已登录会话
 - ✅ 支持 Pixiv Discovery 推荐作品随机获取
-- ✅ 支持 R18 排行榜随机获取（需开启 Pixiv R18 设置）
+- ✅ 支持从 R18 Discovery 页面随机获取推荐作品（需开启 Pixiv R18 设置）
 - ✅ 图片通过浏览器网络栈下载，解决 `i.pximg.net` 直连超时问题
 - ✅ 自动展开「查看全部」按钮，获取多图作品的全部图片
 - ✅ 返回作品详细信息：标题、作者、标签、喜欢数、收藏数、浏览数
@@ -63,7 +63,7 @@ npm install @chuanhezi/koishi-plugin-pixiv-repaired
 | 配置项 | 说明 |
 |--------|------|
 | `HTMLSelector.推荐作品URLs选择器` | Discovery 推荐页面的 JS 代码片段，提取作品缩略图 URL |
-| `HTMLSelector.R18排行URLs选择器` | R18 排行榜页面的 JS 代码片段，提取 R18 作品缩略图 URL |
+| `HTMLSelector.R18排行URLs选择器` | R18 Discovery 页面的 JS 代码片段，提取推荐作品缩略图 URL |
 | `HTMLSelector.主图像查看全部按钮选择点击` | 点击「查看全部」按钮的 JS 代码，展开多图作品的全部图片 |
 | `HTMLSelector.主图像URLs选择器` | 作品详情页中原图 URL 的 JS 提取代码 |
 
@@ -72,7 +72,7 @@ npm install @chuanhezi/koishi-plugin-pixiv-repaired
 | 指令 | 说明 |
 |------|------|
 | `随机涩图` | 从 Pixiv Discovery 推荐作品中随机获取一张图片 |
-| `随机R18涩图` | 从 Pixiv R18 排行榜中随机获取一张图片（需先在 Pixiv 设置中开启 R18 显示） |
+| `随机R18涩图` | 从 Pixiv R18 Discovery 页面随机获取推荐作品（需先在 Pixiv 设置中开启 R18 显示） |
 
 ## 工作原理
 
