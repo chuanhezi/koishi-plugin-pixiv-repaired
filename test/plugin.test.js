@@ -1,7 +1,9 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const Module = require('node:module');
 const path = require('node:path');
 const test = require('node:test');
+const { fileURLToPath } = require('node:url');
 
 const pluginPath = path.resolve(__dirname, '../lib/index.js');
 
@@ -97,9 +99,10 @@ class FakePage {
 }
 
 class ArtworkPage extends FakePage {
-  constructor() {
+  constructor(imageURLs = []) {
     super();
     this.clickCalls = 0;
+    this.imageURLs = imageURLs;
     this.stableWaitCalls = 0;
     this.waitRegisteredBeforeClick = false;
   }
@@ -117,7 +120,7 @@ class ArtworkPage extends FakePage {
   async evaluate(script) {
     if (script === 'thumbnail-selector') return ['https://i.pximg.net/thumbnail.jpg'];
     if (script === 'expand-selector') return undefined;
-    if (script === 'url-selector') return [];
+    if (script === 'url-selector') return this.imageURLs;
     const source = String(script);
     if (source.includes('timeoutMs')) {
       this.stableWaitCalls += 1;
@@ -132,6 +135,18 @@ class ArtworkPage extends FakePage {
   }
 
   async waitForSelector() {}
+}
+
+class DownloadPage extends FakePage {
+  async goto(url) {
+    await super.goto(url);
+    return {
+      buffer: async () => Buffer.from([0xff, 0xd8, 0xff, 0x00]),
+      ok: () => true,
+    };
+  }
+
+  async setExtraHTTPHeaders() {}
 }
 
 function createBrowser(initialPages = [], pageFactory = () => new FakePage()) {
@@ -286,4 +301,38 @@ test('artwork URL wait is registered before click and expanded images are stabil
   assert.equal(controlledPage.clickCalls, 1);
   assert.equal(controlledPage.waitRegisteredBeforeClick, true);
   assert.equal(controlledPage.stableWaitCalls, 1);
+});
+
+test('image send falls back to a data URI and still sends artwork information', async () => {
+  let pageCount = 0;
+  const browser = createBrowser([], () => {
+    pageCount += 1;
+    return pageCount === 1
+      ? new ArtworkPage(['https://i.pximg.net/original.jpg'])
+      : new DownloadPage();
+  });
+  const fixture = createContext(true, browser);
+  loadPlugin().apply(fixture.ctx);
+  await waitFor(() => browser.createdPages[0]?.gotoCalls === 1);
+
+  const sent = [];
+  const action = fixture.actions.get('随机涩图 [message:text]');
+  await action({
+    session: {
+      messageId: '4',
+      send: async (message) => {
+        sent.push(message);
+        if (message.type === 'img' && message.props.src.startsWith('file:')) {
+          throw new Error('OneBot rejected local file');
+        }
+      },
+    },
+  }, '');
+
+  const fileMessage = sent.find((message) => message.type === 'img' && message.props.src.startsWith('file:'));
+  const dataMessage = sent.find((message) => message.type === 'img' && message.props.src.startsWith('data:image/jpeg;base64,'));
+  assert.ok(fileMessage);
+  assert.ok(dataMessage);
+  assert.equal(fs.existsSync(fileURLToPath(fileMessage.props.src)), false);
+  assert.match(sent.at(-1), /作品信息/);
 });
